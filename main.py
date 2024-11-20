@@ -77,12 +77,15 @@ model.addConstrs((quicksum(alpha[p, z, t] *γ_zq[z][q] for p in P) <= 1 - (Φ_q[
                     for z in Z for t in T for q in Q), name="r_11")
 
 
-model.addConstr( (
-        quicksum(w[p, q, t] for p in P) <= 
-        quicksum(C_z * γ_zq[z, q] for z in Z) + 
-        quicksum(theta[p, q, j, t] for p in P for j in Q if j != q)
-        for q in Q for t in T
-    ), name="r_12") #Restricción de flujo de cuadrantes.
+for q in Q:
+    for t in T:
+        model.addConstr(
+            quicksum(w[p, q, t] for p in P) <= 
+            quicksum(C_z * γ_zq[z, q] for z in Z) + 
+            quicksum(theta[p, q, j, t] for p in P for j in Q if j != q),
+            name="r_12"
+        )
+ #Restricción de flujo de cuadrantes.
 
 #Restricción de inventario de personas de la zona segura.
 
@@ -99,9 +102,13 @@ model.addConstrs((
 
 #Restricción de capacidad de las zonas seguras.
 
-model.addConstrs((X[z, t] <= C_z[z] for z in Z for t in T), name="r_14") #Capacidad de zonas seguras.
+model.addConstrs(
+    (X[z, t] <= C_z for z in Z for t in T),
+    name="r_14"
+)
+ #Capacidad de zonas seguras.
 
 model.optimize()
 
-print("Objetivo:", model.objVal)
+print("Objetivo:", model.ObjVal)
 
