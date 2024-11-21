@@ -21,7 +21,7 @@ model.update()
 
 ### FO ###
 
-objetivo = quicksum(x[z, T_max] for z in Z)
+objetivo = quicksum(x[z,T_max] for z in Z )
 
 model.setObjective(objetivo, GRB.MAXIMIZE)
 
@@ -41,7 +41,7 @@ model.addConstrs((2*alpha[p, z, t] <= w[p, q, t] + γ_zq[z, q]
 
 #R4 / Restriccion de cambio de cuadrante
 model.addConstrs((quicksum(theta[p, q, j, t] for t in T) <= 1 - B_pq[p, j]
-                  for p in P for q in Q for j in Q if j != q),
+                  for p in P for q in Q for j in Q for t in T),
                  name="r_4")
 
 #R5 / Condicion inicial de cuadrante
@@ -70,36 +70,38 @@ model.addConstr((quicksum(x[z,T_max]for z in Z) >= K),
                  name="r_9")
 
 #R10 / Restriccion de zonas afectadas por tsunami **
-model.addConstrs((quicksum(alpha[p, z, t] *γ_zq[z,q] for p in P) <= 1 - (Φ_q[q] + h_z[z] * Φ_q[q])*γ_zq[z,q]
+model.addConstrs((quicksum(alpha[p, z, t] *γ_zq[z,q] for p in P) <= 1 - Φ_q[q] + (h_z[z] * Φ_q[q])*γ_zq[z,q]
                   for z in Z for t in T for q in Q),
                  name="r_10")
 
+#R11 / Restriccion de activacion de theta_pqjt
+model.addConstrs((quicksum(w[p,q,t] for p in P) <= quicksum(C_z*γ_zq[z,q] for z in Z)
+                  + quicksum(theta[p,q,j,t] for j in Q if j != q)
+                  for q in Q for p in P for t in T),
+                 name="r_11")
 
-model.addConstr( (
-        quicksum(w[p, q, t] for p in P) <= 
-        quicksum(C_z * γ_zq[z, q] for z in Z) + 
-        quicksum(theta[p, q, j, t] for p in P for j in Q if j != q)
-        for q in Q for t in T
-    ), name="r_12") #Restricción de flujo de cuadrantes.
+#R12 / Restriccion de inventario de personas de la zona segura
+model.addConstrs((x[z,t] == x[z,t-1]
+                  + quicksum(alpha[p, z, t - d_zp[z, p] // (v_p[p]*60) - int(1.3 * h_z[z])]for p in P if 2 <= t - d_zp[z, p] // (v_p[p]*60) - int(1.3 * h_z[z]) <= max(T))
+                  for z in Z for t in T if t > min(T)),
+                 name="r_12")
 
-#Restricción de inventario de personas de la zona segura.
+#R13 / Condicion inicial de inventario de la zona segura
+model.addConstrs((x[z,1] == 0
+                  for z in Z),
+                 name="r_13")
 
-model.addConstrs((X[z, 1] == 0 for z in Z), name="r_13") #Condición inicial de inventario de las zonas.
-model.addConstrs((
-    X[z, t] == X[z, t-1] 
-               + quicksum(
-                   alpha[p, z, t - (d_zp[z][p] // v_p[p]) - int(1.3 * h_z[z])] 
-                   for p in P 
-                   if t - (d_zp[z][p] // v_p[p]) - int(1.3 * h_z[z]) >= min(T)
-               )
-    for z in Z for t in T if t > min(T)
-), name="restriccion_13") #Inventario de las zonas seguras.
-
-#Restricción de capacidad de las zonas seguras.
-
-model.addConstrs((X[z, t] <= C_z[z] for z in Z for t in T), name="r_14") #Capacidad de zonas seguras.
+#R14 / capacidad de la zona segura
+model.addConstrs((x[z,t] <= C_z
+                  for z in Z for t in T),
+                 name="r_14")
 
 model.optimize()
 
-print("Objetivo:", model.objVal)
+try:
+    print("Objetivo:", model.ObjVal)
+    model.write("modelo_guardado.lp")
+except:
+    model.computeIIS()
+    model.write("infeasible_model.ilp") 
 
