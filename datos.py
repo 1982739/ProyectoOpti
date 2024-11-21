@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 ## Hiperparametros
 def cargar_parametros():
-    T_max = int(14/(7/9))
+    T_max = 20
 
 
     # Conjuntos
-    P = np.arange(0, 100)
-    Z = np.arange(0, 10*4)
-    Q = np.arange(0,10)
+    P = np.arange(0, 10)
+    Z = np.arange(0, 3)
+    Q = np.arange(0,3)
     T = np.arange(1,T_max+1)
 
     # Parametros
@@ -21,7 +21,7 @@ def cargar_parametros():
                 B_pq[i][j] = 1
 
     γ = np.zeros(len(Z), dtype=int) # Inicializar γ con ceros
-    num_zonas_seguras = 7
+    num_zonas_seguras = 3
     γ_zq = np.zeros((len(Z), len(Q))) # Zona z en cuadrante q
 
     for q in range(len(Q)): # Asignar zonas seguras
@@ -48,7 +48,7 @@ def cargar_parametros():
     f_qj = np.genfromtxt('datos.csv', delimiter=',', dtype=float) # Tiempo de viaje entre cuadrantes q y j
 
 
-    K = len(P)*0.8 #personas minimas a evacuar
+    K = len(P)*0.1 #personas minimas a evacuar
 
 
     h_z = np.zeros(len(Z), dtype=int)
@@ -58,9 +58,7 @@ def cargar_parametros():
         h_z[z] = 1
 
     Φ_q = np.zeros(len(Q), dtype=int)
-    Φ_q[:8] = 1 ## Cuadrantes costeros
+    Φ_q[0] = 1 ## Cuadrantes costeros
     print("Datos cargados")
     
     return P, Z, Q, T, B, B_pq, γ, γ_zq, d_zp, v_p, C_z, f_qj, Φ_q, K, h_z, T_max
-
-cargar_parametros()

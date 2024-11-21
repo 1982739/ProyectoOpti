@@ -45,7 +45,7 @@ model.addConstrs((quicksum(theta[p, q, j, t] for t in T) <= 1 - B_pq[p, j]
                  name="r_4")
 
 #R5 / Condicion inicial de cuadrante
-model.addConstrs((w[p, q, 1] == B_pq[p, q] - quicksum(theta[p, q, j, 1] for j in Q if j != q)
+model.addConstrs((w[p, q, 1] == B_pq[p, q]
                   for p in P for q in Q),
                  name="r_5")
 
@@ -56,8 +56,8 @@ model.addConstrs((quicksum(w[p,q,t] for q in Q) == 1
 
 #R7 / Posicionamiento de cuadrante 
 model.addConstrs((w[p, q, t] == w[p, q, t-1] - quicksum(theta[p, q, j, t] for j in Q if j != q)
-                  + quicksum(theta[p, j, q, t-int(f_qj[j][q])] for j in Q if j != q and max(T) >= t-int(f_qj[j][q]) >= 1)
-                  for p in P for q in Q for j in Q for t in range(2, max(T))),
+                  + quicksum(theta[p, j, q, t-int(f_qj[j][q]//(v_p[p]*60))] for j in Q if j != q and max(T) >= t-int(f_qj[j][q]//(v_p[p]*60)) >= 1)
+                  for p in P for q in Q for t in range(2, max(T))),
                  name="r_7")
 
 #R8 / Flujo de cuadrantes
@@ -87,7 +87,7 @@ model.addConstrs((X[z,t] == X[z,t-1]
                  name="r_12")
 
 #R13 / Condicion inicial de inventario de la zona segura
-model.addConstrs((X[z,1] == quicksum(alpha[p,z,1] for p in P)
+model.addConstrs((X[z,1] == 0
                   for z in Z),
                  name="r_13")
 
@@ -98,5 +98,8 @@ model.addConstrs((X[z,T_max] <= C_z
 
 model.optimize()
 
-print("Objetivo:", model.objVal)
+try:
+    print("Objetivo:", model.ObjVal)
+except:
+    print("No se encontró solución")
 
