@@ -1,0 +1,11 @@
+\ Model _copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Maximize
+ 
+Subject To
+ r_10[1,1,0]: alpha[0,1,1] + alpha[1,1,1] + alpha[2,1,1] + alpha[3,1,1]
+   + alpha[4,1,1] <= -1
+Bounds
+Binaries
+ alpha[0,1,1] alpha[1,1,1] alpha[2,1,1] alpha[3,1,1] alpha[4,1,1]
+End
