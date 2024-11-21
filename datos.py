@@ -43,7 +43,8 @@ def cargar_parametros():
 
     v_p = np.random.uniform(0.95, 1.25, len(P)) # Velocidad de persona p
 
-    C_z = np.round(100 / 0.93 * 4, 0) # 100 m2 por piso, 4 pisos, 1 persona usa 0.93 m2. Se supone que todas las vías de evacuación serán verticales. 
+    C_z =  np.round(100 / 0.93 * 4, 0)
+ # 100 m2 por piso, 4 pisos, 1 persona usa 0.93 m2. Se supone que todas las vías de evacuación serán verticales. 
 
     f_qj = np.genfromtxt('datos.csv', delimiter=',', dtype=float) # Tiempo de viaje entre cuadrantes q y j
 

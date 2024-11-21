@@ -74,33 +74,32 @@ model.addConstrs((quicksum(alpha[p, z, t] *γ_zq[z,q] for p in P) <= 1 - (Φ_q[q
                   for z in Z for t in T for q in Q),
                  name="r_10")
 
-#R11 / Restriccion de activacion de theta_pqjt
-model.addConstrs((quicksum(w[p,q,t] for p in P) <= quicksum(C_z*γ_zq[z,q] for z in Z)
-                  + quicksum(theta[p,q,j,t] for j in Q if j != q)
-                  for q in Q for p in P for t in T),
-                 name="r_11")
 
-#R12 / Restriccion de inventario de personas de la zona segura
-model.addConstrs((x[z,t] == x[z,t-1]
-                  + quicksum(alpha[p, z, t - d_zp[z, p] // (v_p[p]*60) - int(1.3 * h_z[z])]for p in P if 2 <= t - d_zp[z, p] // (v_p[p]*60) - int(1.3 * h_z[z]) <= max(T))
-                  for z in Z for t in T if t > min(T)),
-                 name="r_12")
+model.addConstr( (
+        quicksum(w[p, q, t] for p in P) <= 
+        quicksum(C_z * γ_zq[z, q] for z in Z) + 
+        quicksum(theta[p, q, j, t] for p in P for j in Q if j != q)
+        for q in Q for t in T
+    ), name="r_12") #Restricción de flujo de cuadrantes.
 
-#R13 / Condicion inicial de inventario de la zona segura
-model.addConstrs((x[z,1] == 0
-                  for z in Z),
-                 name="r_13")
+#Restricción de inventario de personas de la zona segura.
 
-#R14 / capacidad de la zona segura
-model.addConstrs((x[z,t] <= C_z
-                  for z in Z for t in T),
-                 name="r_14")
+model.addConstrs((X[z, 1] == 0 for z in Z), name="r_13") #Condición inicial de inventario de las zonas.
+model.addConstrs((
+    X[z, t] == X[z, t-1] 
+               + quicksum(
+                   alpha[p, z, t - (d_zp[z][p] // v_p[p]) - int(1.3 * h_z[z])] 
+                   for p in P 
+                   if t - (d_zp[z][p] // v_p[p]) - int(1.3 * h_z[z]) >= min(T)
+               )
+    for z in Z for t in T if t > min(T)
+), name="restriccion_13") #Inventario de las zonas seguras.
+
+#Restricción de capacidad de las zonas seguras.
+
+model.addConstrs((X[z, t] <= C_z[z] for z in Z for t in T), name="r_14") #Capacidad de zonas seguras.
 
 model.optimize()
 
-try:
-    print("Objetivo:", model.ObjVal)
-except:
-    print("No se encontró solución")
-    model.write("model.lp")
+print("Objetivo:", model.objVal)
 
