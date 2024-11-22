@@ -56,7 +56,7 @@ model.addConstrs((quicksum(w[p,q,t] for q in Q) == 1
 
 #R7 / Posicionamiento de cuadrante 
 model.addConstrs((w[p, q, t] == w[p, q, t-1] - quicksum(theta[p, q, j, t] for j in Q if j != q)
-                  + quicksum(theta[p, j, q, t-int(f_qj[j][q]//(v_p[p]*60))] for j in Q if j != q and max(T) >= t-int(f_qj[j][q]//(v_p[p]*60)) >= 1)
+                  + quicksum(theta[p, j, q, t-int(f_qj[j][q]//(v_p[p]*60))] for j in Q if j != q and max(T) >= t-int(f_qj[j][q]//(v_p[p]*60)) >= 2)
                   for p in P for q in Q for t in range(2, max(T))),
                  name="r_7")
 
@@ -70,12 +70,12 @@ model.addConstr((quicksum(x[z,T_max]for z in Z) >= K),
                  name="r_9")
 
 #R10 / Restriccion de zonas afectadas por tsunami **
-model.addConstrs((quicksum(alpha[p, z, t] *γ_zq[z,q] for p in P) <= 1 - Φ_q[q] + (h_z[z] * Φ_q[q])*γ_zq[z,q]
-                  for z in Z for t in T for q in Q),
+model.addConstrs((alpha[p, z, t] <= 1+ (h_z[z]-1)*γ_zq[z,q]*Φ_q[q]
+                  for z in Z for t in T for q in Q for p in P),
                  name="r_10")
 
 #R11 / Restriccion de activacion de theta_pqjt
-model.addConstrs((quicksum(w[p,q,t] for p in P) <= quicksum(C_z*γ_zq[z,q] for z in Z)
+model.addConstrs((w[p,q,t] + quicksum(x[z,t]*γ_zq[z,q] for z in Z) <= quicksum(C_z*γ_zq[z,q] for z in Z)
                   + quicksum(theta[p,q,j,t] for j in Q if j != q)
                   for q in Q for p in P for t in T),
                  name="r_11")
@@ -95,6 +95,9 @@ model.addConstrs((x[z,1] == 0
 model.addConstrs((x[z,t] <= C_z
                   for z in Z for t in T),
                  name="r_14")
+
+
+
 
 model.optimize()
 
