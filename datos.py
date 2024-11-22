@@ -3,9 +3,9 @@ import pandas as pd
 ## Hiperparametros
 def cargar_parametros():
     T_max = 18
-    cuadrantes = 2
-    zonas_cuadrante = 2
-    personas = 20
+    cuadrantes = 4
+    zonas_cuadrante = 3
+    personas = 800
 
     # Conjuntos
     P = np.arange(0, personas)
@@ -45,7 +45,7 @@ def cargar_parametros():
 
     v_p = np.random.uniform(0.95, 1.25, len(P)) # Velocidad de persona p
 
-    C_z =  5
+    C_z = 100
  # 100 m2 por piso, 4 pisos, 1 persona usa 0.93 m2. Se supone que todas las vías de evacuación serán verticales. 
 
     f_qj = np.genfromtxt('datos.csv', delimiter=',', dtype=float) # Tiempo de viaje entre cuadrantes q y j

@@ -34,10 +34,6 @@ model.addConstrs((quicksum(alpha[p, z, t] for z in Z for t in T) <= 1
                   for p in P),
                  name="r_2")
 
-#R3 / Restriccion de valor de alpha
-model.addConstrs((2*alpha[p, z, t] <= w[p, q, t] + γ_zq[z, q]
-                  for p in P for q in Q for t in T for z in Z),
-                 name="r_3")
 
 #R4 / Restriccion de cambio de cuadrante
 model.addConstrs((quicksum(theta[p, q, j, t] for t in T) <= 1 - B_pq[p, j]
