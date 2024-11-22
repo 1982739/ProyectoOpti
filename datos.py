@@ -2,10 +2,11 @@ import numpy as np
 
 ## Hiperparametros
 def cargar_parametros():
-    T_max = 20
-    cuadrantes = 4
+    T_max = 18
+    cuadrantes = 8
     zonas_cuadrante = 3
-    personas = 2000
+    personas = 8000
+    C_z = int(round(100/0.93)*4) # 100 m2 por piso, 4 pisos, 1 persona usa 0.93 m2 
 
     # Conjuntos
     P = np.arange(0, personas)
@@ -37,7 +38,6 @@ def cargar_parametros():
 
     v_p = np.random.uniform(0.95, 1.25, len(P)) # Velocidad de persona p
 
-    C_z = 100 # 100 m2 por piso, 4 pisos, 1 persona usa 0.93 m2 
 
     f_qj = np.genfromtxt('datos.csv', delimiter=',', dtype=float) # Tiempo de viaje entre cuadrantes q y j
 
@@ -53,5 +53,7 @@ def cargar_parametros():
     Φ_q[:(len(Q)//2)] = 1 ## Cuadrantes costeros
 
     print("Datos cargados")
+
     return P, Z, Q, T, B, B_pq, γ, γ_zq, d_zp, v_p, C_z, f_qj, Φ_q, K, h_z, T_max
+
 

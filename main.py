@@ -95,10 +95,19 @@ model.addConstrs((x[z,t] <= C_z
                   for z in Z for t in T),
                  name="r_14")
 
+model.setParam(GRB.Param.TimeLimit, 30)
+
 model.optimize()
 
 try:
     print("Objetivo:", model.ObjVal)
+    porcentaje_phi_q = (sum(Φ_q) / len(Φ_q)) * 100
+    print(f'Cantidad de cuadrantes (Q): {len(Q)}')
+    print(f'Cantidad de zonas por cuadrante: {len(Z)//len(Q)}')
+    print(f'Cantidad de puntos (P): {len(P)}')
+    print(f'Cantidad de capacidades de zona (C_z): {C_z}')
+    print(f'Porcentaje de cuadrantes inundados: {porcentaje_phi_q:.2f}%')
+    print(f'Valor de T_max: {T_max}')
     restricciones_activas = defaultdict(list)
 
     for constr in model.getConstrs():
