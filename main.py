@@ -1,6 +1,9 @@
 #importar bibliotecas
 from gurobipy import GRB, Model, quicksum
 from datos import cargar_parametros
+
+from collections import defaultdict # Hay q justificar que utilizamos estoo!!
+
 model = Model()
 
 ### Cargar parámetros ###
@@ -92,13 +95,20 @@ model.addConstrs((x[z,t] <= C_z
                   for z in Z for t in T),
                  name="r_14")
 
-
-
-
 model.optimize()
 
 try:
     print("Objetivo:", model.ObjVal)
+    restricciones_activas = defaultdict(list)
+
+    for constr in model.getConstrs():
+        if constr.slack == 0: 
+            nombre_base = constr.ConstrName.split('[')[0]
+            restricciones_activas[nombre_base].append(constr.ConstrName)
+
+    for nombre_base, activas in restricciones_activas.items():
+        print(f"{nombre_base} tiene {len(activas)} restricciones activas.")
+
     model.write("modelo_guardado.lp")
 except:
     model.computeIIS()
